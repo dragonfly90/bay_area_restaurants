@@ -35,5 +35,65 @@ const restaurants = [
     rating: 0,
     notes: "",
     dateVisited: ""
+  },
+  {
+    id: 4,
+    name: "Keke's Breakfast Cafe",
+    englishName: "Keke's Breakfast Cafe",
+    address: "311 S Mathilda Ave, Sunnyvale, CA 94086",
+    lat: 37.3722,
+    lng: -122.0307,
+    cuisine: "American Breakfast",
+    rating: 0,
+    notes: "",
+    dateVisited: ""
+  },
+  {
+    id: 5,
+    name: "杨国福麻辣烫",
+    englishName: "YGF Malatang Noodles & Pots",
+    address: "19672 Stevens Creek Blvd, Cupertino, CA",
+    lat: 37.3230,
+    lng: -122.0098,
+    cuisine: "Malatang / Hot Pot",
+    rating: 0,
+    notes: "",
+    dateVisited: ""
+  },
+  {
+    id: 6,
+    name: "张亮麻辣烫",
+    englishName: "Zhangliang Malatang",
+    address: "246 Castro St, Mountain View, CA 94041",
+    lat: 37.3940,
+    lng: -122.0790,
+    cuisine: "Malatang / Hot Pot",
+    rating: 0,
+    notes: "",
+    dateVisited: ""
+  },
+  {
+    id: 7,
+    name: "小香牛骨米粉",
+    englishName: "Hunan Mifen",
+    address: "592 E El Camino Real, Sunnyvale, CA 94087",
+    lat: 37.3691,
+    lng: -122.0336,
+    cuisine: "Hunan Rice Noodles",
+    rating: 0,
+    notes: "",
+    dateVisited: ""
+  },
+  {
+    id: 8,
+    name: "自选麻辣烫",
+    englishName: "Mala Town",
+    address: "438 Barber Ln, Milpitas, CA 95035",
+    lat: 37.4165,
+    lng: -121.9225,
+    cuisine: "Malatang / Hot Pot",
+    rating: 0,
+    notes: "",
+    dateVisited: ""
   }
 ];
