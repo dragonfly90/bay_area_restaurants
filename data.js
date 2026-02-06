@@ -131,5 +131,17 @@ const restaurants = [
     rating: 0,
     notes: "",
     dateVisited: ""
+  },
+  {
+    id: 12,
+    name: "やよい軒",
+    englishName: "Yayoi",
+    address: "20684 Homestead Rd, Cupertino, CA 95014",
+    lat: 37.3411,
+    lng: -122.0190,
+    cuisine: "Japanese Teishoku",
+    rating: 0,
+    notes: "",
+    dateVisited: ""
   }
 ];
