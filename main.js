@@ -19,6 +19,27 @@ const restaurantIcon = L.divIcon({
 // Store markers for reference
 const markers = {};
 
+// Visit log storage functions
+function getVisits(restaurantId) {
+  const visits = JSON.parse(localStorage.getItem('restaurantVisits') || '{}');
+  return visits[restaurantId] || [];
+}
+
+function saveVisit(restaurantId, timeOfDay) {
+  const visits = JSON.parse(localStorage.getItem('restaurantVisits') || '{}');
+  if (!visits[restaurantId]) {
+    visits[restaurantId] = [];
+  }
+  const today = new Date().toLocaleDateString('en-US', { 
+    year: 'numeric', 
+    month: 'short', 
+    day: 'numeric' 
+  });
+  visits[restaurantId].push({ date: today, time: timeOfDay });
+  localStorage.setItem('restaurantVisits', JSON.stringify(visits));
+  return visits[restaurantId];
+}
+
 // Generate star rating HTML
 function getStarRating(rating) {
   if (!rating || rating === 0) return '<span style="color:#ccc;">Not rated</span>';
@@ -29,8 +50,27 @@ function getStarRating(rating) {
   return stars;
 }
 
+// Format visits for display
+function formatVisits(restaurantId) {
+  const visits = getVisits(restaurantId);
+  if (visits.length === 0) return '';
+  
+  const recentVisits = visits.slice(-3).reverse();
+  let html = '<div class="visit-history"><strong>Recent visits:</strong><ul>';
+  recentVisits.forEach(v => {
+    html += `<li>${v.date} (${v.time})</li>`;
+  });
+  html += '</ul>';
+  if (visits.length > 3) {
+    html += `<span class="more-visits">+${visits.length - 3} more</span>`;
+  }
+  html += '</div>';
+  return html;
+}
+
 // Create popup content
 function createPopupContent(restaurant) {
+  const visits = getVisits(restaurant.id);
   let content = `
     <div class="popup-title">${restaurant.name}</div>
     <div class="popup-english">${restaurant.englishName}</div>
@@ -43,11 +83,64 @@ function createPopupContent(restaurant) {
     content += `<div class="popup-notes">"${restaurant.notes}"</div>`;
   }
   
-  if (restaurant.dateVisited) {
-    content += `<div class="popup-date">Visited: ${restaurant.dateVisited}</div>`;
-  }
+  // Visit history
+  content += formatVisits(restaurant.id);
+  
+  // Log visit button
+  content += `
+    <div class="log-visit-section">
+      <button class="log-visit-btn" onclick="showVisitModal(${restaurant.id})">+ Log Visit</button>
+    </div>
+  `;
   
   return content;
+}
+
+// Show visit modal
+window.showVisitModal = function(restaurantId) {
+  const modal = document.getElementById('visit-modal');
+  modal.dataset.restaurantId = restaurantId;
+  modal.style.display = 'flex';
+}
+
+// Close modal
+window.closeVisitModal = function() {
+  document.getElementById('visit-modal').style.display = 'none';
+}
+
+// Log the visit
+window.logVisit = function(timeOfDay) {
+  const modal = document.getElementById('visit-modal');
+  const restaurantId = parseInt(modal.dataset.restaurantId);
+  saveVisit(restaurantId, timeOfDay);
+  closeVisitModal();
+  
+  // Update popup content
+  const restaurant = restaurants.find(r => r.id === restaurantId);
+  if (restaurant && markers[restaurantId]) {
+    markers[restaurantId].setPopupContent(createPopupContent(restaurant));
+  }
+  
+  // Update sidebar card
+  updateSidebarCard(restaurantId);
+}
+
+// Update sidebar card with visit info
+function updateSidebarCard(restaurantId) {
+  const card = document.querySelector(`.restaurant-card[data-id="${restaurantId}"]`);
+  if (!card) return;
+  
+  const visits = getVisits(restaurantId);
+  let visitBadge = card.querySelector('.visit-count');
+  
+  if (visits.length > 0) {
+    if (!visitBadge) {
+      visitBadge = document.createElement('span');
+      visitBadge.className = 'visit-count';
+      card.appendChild(visitBadge);
+    }
+    visitBadge.textContent = `${visits.length} visit${visits.length > 1 ? 's' : ''}`;
+  }
 }
 
 // Add markers to map
@@ -67,6 +160,7 @@ restaurants.forEach(restaurant => {
   card.className = 'restaurant-card';
   card.dataset.id = restaurant.id;
   
+  const visits = getVisits(restaurant.id);
   let cardContent = `
     <h3>${restaurant.name}</h3>
     <div class="english-name">${restaurant.englishName}</div>
@@ -75,8 +169,8 @@ restaurants.forEach(restaurant => {
     <div class="rating">${getStarRating(restaurant.rating)}</div>
   `;
   
-  if (restaurant.dateVisited) {
-    cardContent += `<div class="details">Visited: ${restaurant.dateVisited}</div>`;
+  if (visits.length > 0) {
+    cardContent += `<span class="visit-count">${visits.length} visit${visits.length > 1 ? 's' : ''}</span>`;
   }
   
   card.innerHTML = cardContent;
@@ -101,3 +195,21 @@ if (restaurants.length > 0) {
   const group = new L.featureGroup(Object.values(markers));
   map.fitBounds(group.getBounds().pad(0.1));
 }
+
+// Create visit modal
+const modalHtml = `
+<div id="visit-modal" class="modal" style="display:none;">
+  <div class="modal-content">
+    <h3>Log Your Visit</h3>
+    <p>When did you visit?</p>
+    <div class="time-buttons">
+      <button onclick="logVisit('Breakfast')">Breakfast</button>
+      <button onclick="logVisit('Lunch')">Lunch</button>
+      <button onclick="logVisit('Dinner')">Dinner</button>
+      <button onclick="logVisit('Late Night')">Late Night</button>
+    </div>
+    <button class="cancel-btn" onclick="closeVisitModal()">Cancel</button>
+  </div>
+</div>
+`;
+document.body.insertAdjacentHTML('beforeend', modalHtml);

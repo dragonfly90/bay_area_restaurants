@@ -178,3 +178,126 @@ body {
     order: 1;
   }
 }
+
+/* Visit tracking */
+.visit-count {
+  display: inline-block;
+  background: #27ae60;
+  color: #fff;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  margin-top: 8px;
+}
+
+.visit-history {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #eee;
+  font-size: 0.8rem;
+}
+
+.visit-history ul {
+  margin: 5px 0 0 15px;
+  padding: 0;
+}
+
+.visit-history li {
+  color: #666;
+  margin-bottom: 3px;
+}
+
+.more-visits {
+  color: #999;
+  font-size: 0.75rem;
+  font-style: italic;
+}
+
+.log-visit-section {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid #eee;
+}
+
+.log-visit-btn {
+  background: #27ae60;
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: background 0.2s;
+}
+
+.log-visit-btn:hover {
+  background: #219a52;
+}
+
+/* Modal */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.modal-content {
+  background: #fff;
+  padding: 25px;
+  border-radius: 15px;
+  text-align: center;
+  max-width: 320px;
+  width: 90%;
+}
+
+.modal-content h3 {
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.modal-content p {
+  color: #666;
+  margin-bottom: 15px;
+}
+
+.time-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.time-buttons button {
+  padding: 12px;
+  border: 2px solid #e74c3c;
+  background: #fff;
+  color: #e74c3c;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.time-buttons button:hover {
+  background: #e74c3c;
+  color: #fff;
+}
+
+.cancel-btn {
+  background: none;
+  border: none;
+  color: #999;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.cancel-btn:hover {
+  color: #666;
+}
