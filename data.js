@@ -119,5 +119,17 @@ const restaurants = [
     rating: 0,
     notes: "",
     dateVisited: ""
+  },
+  {
+    id: 11,
+    name: "The Skewer Bar",
+    englishName: "The Skewer Bar",
+    address: "3082 Landess Ave, San Jose, CA 95132",
+    lat: 37.4076,
+    lng: -121.8585,
+    cuisine: "Chinese BBQ Skewers",
+    rating: 0,
+    notes: "",
+    dateVisited: ""
   }
 ];
