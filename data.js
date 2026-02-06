@@ -95,5 +95,29 @@ const restaurants = [
     rating: 0,
     notes: "",
     dateVisited: ""
+  },
+  {
+    id: 9,
+    name: "Dana包子铺",
+    englishName: "Danacious Dumplings",
+    address: "375 Saratoga Ave M, San Jose, CA",
+    lat: 37.3195,
+    lng: -121.9680,
+    cuisine: "Chinese Dumplings / Baozi",
+    rating: 0,
+    notes: "",
+    dateVisited: ""
+  },
+  {
+    id: 10,
+    name: "川悦麻辣烫",
+    englishName: "CUANYUE Mala Moment",
+    address: "1036 E El Camino Real, Sunnyvale, CA 94087",
+    lat: 37.3521,
+    lng: -122.0055,
+    cuisine: "Malatang / Hot Pot",
+    rating: 0,
+    notes: "",
+    dateVisited: ""
   }
 ];
