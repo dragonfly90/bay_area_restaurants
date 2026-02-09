@@ -373,6 +373,129 @@ window.addRestaurantManual = function(event) {
 }
 
 // =====================================================
+// Export/Import Functions
+// =====================================================
+
+window.exportData = function() {
+  const allRestaurants = getAllRestaurants();
+  const visits = JSON.parse(localStorage.getItem('restaurantVisits') || '{}');
+  const customRestaurants = getCustomRestaurants();
+
+  let md = `# My Bay Area Restaurants\n\n`;
+  md += `*Exported on ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}*\n\n`;
+  md += `---\n\n`;
+
+  // Summary
+  const totalVisits = Object.values(visits).reduce((sum, v) => sum + v.length, 0);
+  md += `## Summary\n\n`;
+  md += `- **Total Restaurants:** ${allRestaurants.length}\n`;
+  md += `- **Total Visits:** ${totalVisits}\n`;
+  md += `- **Custom Added:** ${customRestaurants.length}\n\n`;
+  md += `---\n\n`;
+
+  // Restaurants with visits
+  md += `## Visit History\n\n`;
+
+  allRestaurants.forEach(r => {
+    const restaurantVisits = visits[r.id] || [];
+    md += `### ${r.name} (${r.englishName})\n\n`;
+    md += `- **Cuisine:** ${r.cuisine}\n`;
+    md += `- **Address:** ${r.address}\n`;
+    md += `- **Location:** ${r.lat}, ${r.lng}\n`;
+    if (r.rating > 0) md += `- **Rating:** ${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}\n`;
+    if (r.notes) md += `- **Notes:** ${r.notes}\n`;
+
+    if (restaurantVisits.length > 0) {
+      md += `- **Visits (${restaurantVisits.length}):**\n`;
+      restaurantVisits.forEach(v => {
+        md += `  - ${v.date} (${v.time})\n`;
+      });
+    } else {
+      md += `- **Visits:** None yet\n`;
+    }
+    md += `\n`;
+  });
+
+  // Custom restaurants data (for re-import)
+  md += `---\n\n`;
+  md += `## Data (for import)\n\n`;
+  md += `\`\`\`json\n`;
+  md += JSON.stringify({
+    customRestaurants: customRestaurants,
+    visits: visits
+  }, null, 2);
+  md += `\n\`\`\`\n`;
+
+  // Download file
+  const blob = new Blob([md], { type: 'text/markdown' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `bay-area-restaurants-${new Date().toISOString().split('T')[0]}.md`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+window.importData = function(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const content = e.target.result;
+
+    // Extract JSON data from markdown
+    const jsonMatch = content.match(/```json\n([\s\S]*?)\n```/);
+    if (!jsonMatch) {
+      alert('Could not find data in the markdown file. Make sure it was exported from this app.');
+      return;
+    }
+
+    try {
+      const data = JSON.parse(jsonMatch[1]);
+
+      // Merge custom restaurants
+      if (data.customRestaurants && data.customRestaurants.length > 0) {
+        const existing = getCustomRestaurants();
+        const existingIds = new Set(existing.map(r => r.id));
+        const newRestaurants = data.customRestaurants.filter(r => !existingIds.has(r.id));
+        localStorage.setItem('customRestaurants', JSON.stringify([...existing, ...newRestaurants]));
+      }
+
+      // Merge visits
+      if (data.visits) {
+        const existingVisits = JSON.parse(localStorage.getItem('restaurantVisits') || '{}');
+        Object.keys(data.visits).forEach(id => {
+          if (!existingVisits[id]) {
+            existingVisits[id] = data.visits[id];
+          } else {
+            // Merge visits, avoid duplicates by date+time
+            const existingSet = new Set(existingVisits[id].map(v => `${v.date}-${v.time}`));
+            data.visits[id].forEach(v => {
+              if (!existingSet.has(`${v.date}-${v.time}`)) {
+                existingVisits[id].push(v);
+              }
+            });
+          }
+        });
+        localStorage.setItem('restaurantVisits', JSON.stringify(existingVisits));
+      }
+
+      alert('Data imported successfully! Refreshing page...');
+      location.reload();
+
+    } catch (err) {
+      console.error('Import error:', err);
+      alert('Error parsing data. Please check the file format.');
+    }
+  };
+  reader.readAsText(file);
+
+  // Reset file input
+  event.target.value = '';
+}
+
+// =====================================================
 // Initialize
 // =====================================================
 

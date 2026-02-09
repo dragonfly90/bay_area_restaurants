@@ -18,7 +18,12 @@
     <aside class="sidebar">
       <div class="sidebar-header">
         <h1>My Restaurants</h1>
-        <button id="add-btn" class="add-btn" onclick="openAddModal()">+ Add</button>
+        <div class="header-buttons">
+          <button class="icon-btn" onclick="exportData()" title="Export">⬇</button>
+          <button class="icon-btn" onclick="document.getElementById('import-file').click()" title="Import">⬆</button>
+          <button id="add-btn" class="add-btn" onclick="openAddModal()">+ Add</button>
+        </div>
+        <input type="file" id="import-file" accept=".md" onchange="importData(event)" hidden>
       </div>
       <p class="subtitle">Bay Area spots I've visited</p>
       <div id="restaurant-list"></div>

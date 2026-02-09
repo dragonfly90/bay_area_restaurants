@@ -36,6 +36,31 @@ body {
   color: #333;
 }
 
+.header-buttons {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.icon-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid #ddd;
+  background: #fff;
+  cursor: pointer;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.icon-btn:hover {
+  background: #f0f0f0;
+  border-color: #e74c3c;
+}
+
 .add-btn {
   background: #e74c3c;
   color: #fff;
