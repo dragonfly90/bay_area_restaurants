@@ -19,11 +19,11 @@
       <div class="sidebar-header">
         <h1>My Restaurants</h1>
         <div class="header-buttons">
-          <button class="icon-btn" onclick="exportData()" title="Export">⬇</button>
-          <button class="icon-btn" onclick="document.getElementById('import-file').click()" title="Import">⬆</button>
-          <button id="add-btn" class="add-btn" onclick="openAddModal()">+ Add</button>
+          <button class="small-btn" onclick="window.exportData()">Export</button>
+          <button class="small-btn" onclick="document.getElementById('import-file').click()">Import</button>
+          <button id="add-btn" class="add-btn" onclick="window.openAddModal()">+ Add</button>
         </div>
-        <input type="file" id="import-file" accept=".md" onchange="importData(event)" hidden>
+        <input type="file" id="import-file" accept=".md" onchange="window.importData(event)" style="display:none">
       </div>
       <p class="subtitle">Bay Area spots I've visited</p>
       <div id="restaurant-list"></div>
@@ -41,8 +41,8 @@
       <!-- Search Section -->
       <div class="search-section">
         <div class="search-box">
-          <input type="text" id="search-input" placeholder="Search for a restaurant..." onkeyup="handleSearchKeyup(event)">
-          <button onclick="searchRestaurants()">Search</button>
+          <input type="text" id="search-input" placeholder="Search for a restaurant..." onkeyup="window.handleSearchKeyup(event)">
+          <button onclick="window.searchRestaurants()">Search</button>
         </div>
         <div id="search-results" class="search-results"></div>
       </div>
@@ -50,7 +50,7 @@
       <!-- Or Manual Entry -->
       <div class="divider"><span>or enter manually</span></div>
 
-      <form id="add-form" onsubmit="addRestaurantManual(event)">
+      <form id="add-form" onsubmit="window.addRestaurantManual(event)">
         <div class="form-group">
           <input type="text" id="manual-name" placeholder="Restaurant name" required>
         </div>
@@ -70,7 +70,7 @@
         <button type="submit" class="submit-btn">Add Restaurant</button>
       </form>
 
-      <button class="cancel-btn" onclick="closeAddModal()">Cancel</button>
+      <button class="cancel-btn" onclick="window.closeAddModal()">Cancel</button>
     </div>
   </div>
 
