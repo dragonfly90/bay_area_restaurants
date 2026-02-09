@@ -19,6 +19,23 @@ const restaurantIcon = L.divIcon({
 // Store markers for reference
 const markers = {};
 
+// Load custom restaurants from localStorage
+function getCustomRestaurants() {
+  return JSON.parse(localStorage.getItem('customRestaurants') || '[]');
+}
+
+function saveCustomRestaurant(restaurant) {
+  const custom = getCustomRestaurants();
+  custom.push(restaurant);
+  localStorage.setItem('customRestaurants', JSON.stringify(custom));
+}
+
+// Combine default and custom restaurants
+function getAllRestaurants() {
+  const custom = getCustomRestaurants();
+  return [...restaurants, ...custom];
+}
+
 // Visit log storage functions
 function getVisits(restaurantId) {
   const visits = JSON.parse(localStorage.getItem('restaurantVisits') || '{}');
@@ -30,10 +47,10 @@ function saveVisit(restaurantId, timeOfDay) {
   if (!visits[restaurantId]) {
     visits[restaurantId] = [];
   }
-  const today = new Date().toLocaleDateString('en-US', { 
-    year: 'numeric', 
-    month: 'short', 
-    day: 'numeric' 
+  const today = new Date().toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
   });
   visits[restaurantId].push({ date: today, time: timeOfDay });
   localStorage.setItem('restaurantVisits', JSON.stringify(visits));
@@ -54,7 +71,7 @@ function getStarRating(rating) {
 function formatVisits(restaurantId) {
   const visits = getVisits(restaurantId);
   if (visits.length === 0) return '';
-  
+
   const recentVisits = visits.slice(-3).reverse();
   let html = '<div class="visit-history"><strong>Recent visits:</strong><ul>';
   recentVisits.forEach(v => {
@@ -70,7 +87,6 @@ function formatVisits(restaurantId) {
 
 // Create popup content
 function createPopupContent(restaurant) {
-  const visits = getVisits(restaurant.id);
   let content = `
     <div class="popup-title">${restaurant.name}</div>
     <div class="popup-english">${restaurant.englishName}</div>
@@ -78,21 +94,21 @@ function createPopupContent(restaurant) {
     <div class="popup-address">${restaurant.address}</div>
     <div class="popup-rating">${getStarRating(restaurant.rating)}</div>
   `;
-  
+
   if (restaurant.notes) {
     content += `<div class="popup-notes">"${restaurant.notes}"</div>`;
   }
-  
+
   // Visit history
   content += formatVisits(restaurant.id);
-  
+
   // Log visit button
   content += `
     <div class="log-visit-section">
-      <button class="log-visit-btn" onclick="showVisitModal(${restaurant.id})">+ Log Visit</button>
+      <button class="log-visit-btn" onclick="showVisitModal('${restaurant.id}')">+ Log Visit</button>
     </div>
   `;
-  
+
   return content;
 }
 
@@ -111,16 +127,17 @@ window.closeVisitModal = function() {
 // Log the visit
 window.logVisit = function(timeOfDay) {
   const modal = document.getElementById('visit-modal');
-  const restaurantId = parseInt(modal.dataset.restaurantId);
+  const restaurantId = modal.dataset.restaurantId;
   saveVisit(restaurantId, timeOfDay);
   closeVisitModal();
-  
+
   // Update popup content
-  const restaurant = restaurants.find(r => r.id === restaurantId);
+  const allRestaurants = getAllRestaurants();
+  const restaurant = allRestaurants.find(r => String(r.id) === String(restaurantId));
   if (restaurant && markers[restaurantId]) {
     markers[restaurantId].setPopupContent(createPopupContent(restaurant));
   }
-  
+
   // Update sidebar card
   updateSidebarCard(restaurantId);
 }
@@ -129,10 +146,10 @@ window.logVisit = function(timeOfDay) {
 function updateSidebarCard(restaurantId) {
   const card = document.querySelector(`.restaurant-card[data-id="${restaurantId}"]`);
   if (!card) return;
-  
+
   const visits = getVisits(restaurantId);
   let visitBadge = card.querySelector('.visit-count');
-  
+
   if (visits.length > 0) {
     if (!visitBadge) {
       visitBadge = document.createElement('span');
@@ -143,23 +160,20 @@ function updateSidebarCard(restaurantId) {
   }
 }
 
-// Add markers to map
-restaurants.forEach(restaurant => {
+// Add a restaurant to the map and sidebar
+function addRestaurantToUI(restaurant) {
+  // Add marker
   const marker = L.marker([restaurant.lat, restaurant.lng], { icon: restaurantIcon })
     .addTo(map)
     .bindPopup(createPopupContent(restaurant));
-  
   markers[restaurant.id] = marker;
-});
 
-// Build sidebar list
-const listContainer = document.getElementById('restaurant-list');
-
-restaurants.forEach(restaurant => {
+  // Add sidebar card
+  const listContainer = document.getElementById('restaurant-list');
   const card = document.createElement('div');
   card.className = 'restaurant-card';
   card.dataset.id = restaurant.id;
-  
+
   const visits = getVisits(restaurant.id);
   let cardContent = `
     <h3>${restaurant.name}</h3>
@@ -168,33 +182,201 @@ restaurants.forEach(restaurant => {
     <div class="address">${restaurant.address}</div>
     <div class="rating">${getStarRating(restaurant.rating)}</div>
   `;
-  
+
   if (visits.length > 0) {
     cardContent += `<span class="visit-count">${visits.length} visit${visits.length > 1 ? 's' : ''}</span>`;
   }
-  
+
   card.innerHTML = cardContent;
-  
+
   // Click to fly to marker
   card.addEventListener('click', () => {
-    // Remove active class from all cards
     document.querySelectorAll('.restaurant-card').forEach(c => c.classList.remove('active'));
-    // Add active class to clicked card
     card.classList.add('active');
-    
-    // Fly to marker and open popup
     map.flyTo([restaurant.lat, restaurant.lng], 15, { duration: 0.5 });
     markers[restaurant.id].openPopup();
   });
-  
-  listContainer.appendChild(card);
-});
 
-// Fit map bounds to show all markers
-if (restaurants.length > 0) {
-  const group = new L.featureGroup(Object.values(markers));
-  map.fitBounds(group.getBounds().pad(0.1));
+  listContainer.appendChild(card);
 }
+
+// Initialize all restaurants
+function initRestaurants() {
+  const allRestaurants = getAllRestaurants();
+  allRestaurants.forEach(restaurant => {
+    addRestaurantToUI(restaurant);
+  });
+
+  // Fit map bounds
+  if (allRestaurants.length > 0) {
+    const group = new L.featureGroup(Object.values(markers));
+    map.fitBounds(group.getBounds().pad(0.1));
+  }
+}
+
+// =====================================================
+// Add Restaurant Modal Functions
+// =====================================================
+
+window.openAddModal = function() {
+  document.getElementById('add-modal').style.display = 'flex';
+  document.getElementById('search-input').focus();
+}
+
+window.closeAddModal = function() {
+  document.getElementById('add-modal').style.display = 'none';
+  document.getElementById('search-input').value = '';
+  document.getElementById('search-results').innerHTML = '';
+  document.getElementById('add-form').reset();
+}
+
+window.handleSearchKeyup = function(event) {
+  if (event.key === 'Enter') {
+    searchRestaurants();
+  }
+}
+
+// Search for restaurants using Nominatim (OpenStreetMap)
+window.searchRestaurants = async function() {
+  const query = document.getElementById('search-input').value.trim();
+  if (!query) return;
+
+  const resultsContainer = document.getElementById('search-results');
+  resultsContainer.innerHTML = '<div class="search-loading">Searching...</div>';
+
+  try {
+    // Search in Bay Area
+    const response = await fetch(
+      `https://nominatim.openstreetmap.org/search?` +
+      `q=${encodeURIComponent(query + ' restaurant')}&` +
+      `format=json&` +
+      `addressdetails=1&` +
+      `limit=5&` +
+      `viewbox=-122.5,37.8,-121.5,37.2&` +
+      `bounded=1`
+    );
+
+    const results = await response.json();
+
+    if (results.length === 0) {
+      // Try without bounding box
+      const response2 = await fetch(
+        `https://nominatim.openstreetmap.org/search?` +
+        `q=${encodeURIComponent(query)}&` +
+        `format=json&` +
+        `addressdetails=1&` +
+        `limit=5`
+      );
+      const results2 = await response2.json();
+
+      if (results2.length === 0) {
+        resultsContainer.innerHTML = '<div class="search-empty">No results found. Try a different search or add manually below.</div>';
+        return;
+      }
+
+      renderSearchResults(results2);
+    } else {
+      renderSearchResults(results);
+    }
+
+  } catch (error) {
+    console.error('Search error:', error);
+    resultsContainer.innerHTML = '<div class="search-empty">Search failed. Please try again or add manually.</div>';
+  }
+}
+
+function renderSearchResults(results) {
+  const resultsContainer = document.getElementById('search-results');
+  resultsContainer.innerHTML = results.map((result, index) => {
+    const name = result.name || result.display_name.split(',')[0];
+    const address = result.display_name;
+
+    return `
+      <div class="search-result-item" onclick="selectSearchResult(${index})">
+        <div class="result-name">${name}</div>
+        <div class="result-address">${address}</div>
+      </div>
+    `;
+  }).join('');
+
+  // Store results for selection
+  window.searchResultsData = results;
+}
+
+window.selectSearchResult = function(index) {
+  const result = window.searchResultsData[index];
+  const name = result.name || result.display_name.split(',')[0];
+
+  // Fill the manual form
+  document.getElementById('manual-name').value = name;
+  document.getElementById('manual-english').value = name;
+  document.getElementById('manual-address').value = result.display_name;
+  document.getElementById('manual-lat').value = result.lat;
+  document.getElementById('manual-lng').value = result.lon;
+  document.getElementById('manual-cuisine').value = '';
+
+  // Clear search results
+  document.getElementById('search-results').innerHTML =
+    '<div class="search-empty">Selected! Fill in the cuisine type and click "Add Restaurant".</div>';
+
+  // Focus cuisine input
+  document.getElementById('manual-cuisine').focus();
+}
+
+window.addRestaurantManual = function(event) {
+  event.preventDefault();
+
+  const name = document.getElementById('manual-name').value.trim();
+  const englishName = document.getElementById('manual-english').value.trim() || name;
+  const address = document.getElementById('manual-address').value.trim();
+  const cuisine = document.getElementById('manual-cuisine').value.trim();
+  const lat = parseFloat(document.getElementById('manual-lat').value);
+  const lng = parseFloat(document.getElementById('manual-lng').value);
+
+  if (!name || !address || !cuisine || isNaN(lat) || isNaN(lng)) {
+    alert('Please fill in all required fields');
+    return;
+  }
+
+  // Generate unique ID
+  const allRestaurants = getAllRestaurants();
+  const maxId = Math.max(...allRestaurants.map(r => typeof r.id === 'number' ? r.id : 0), 0);
+  const newId = maxId + 1;
+
+  const newRestaurant = {
+    id: newId,
+    name: name,
+    englishName: englishName,
+    address: address,
+    lat: lat,
+    lng: lng,
+    cuisine: cuisine,
+    rating: 0,
+    notes: '',
+    dateVisited: ''
+  };
+
+  // Save to localStorage
+  saveCustomRestaurant(newRestaurant);
+
+  // Add to UI
+  addRestaurantToUI(newRestaurant);
+
+  // Fly to new restaurant
+  map.flyTo([lat, lng], 15, { duration: 0.5 });
+  setTimeout(() => {
+    markers[newId].openPopup();
+  }, 600);
+
+  // Close modal
+  closeAddModal();
+}
+
+// =====================================================
+// Initialize
+// =====================================================
+
+initRestaurants();
 
 // Create visit modal
 const modalHtml = `
