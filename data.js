@@ -143,5 +143,41 @@ const restaurants = [
     rating: 0,
     notes: "",
     dateVisited: ""
+  },
+  {
+    id: 13,
+    name: "Popeyes",
+    englishName: "Popeyes Louisiana Kitchen",
+    address: "816 W El Camino Real, Sunnyvale, CA 94087",
+    lat: 37.3688,
+    lng: -122.0492,
+    cuisine: "American Fast Food / Fried Chicken",
+    rating: 0,
+    notes: "",
+    dateVisited: ""
+  },
+  {
+    id: 14,
+    name: "McDonald's",
+    englishName: "McDonald's",
+    address: "1060 E El Camino Real, Sunnyvale, CA 94087",
+    lat: 37.3509,
+    lng: -122.0030,
+    cuisine: "American Fast Food",
+    rating: 0,
+    notes: "",
+    dateVisited: ""
+  },
+  {
+    id: 15,
+    name: "塔里木新疆风味",
+    englishName: "Tarim Garden Xinjiang Cuisine",
+    address: "768 Barber Ln, Milpitas, CA 95035",
+    lat: 37.4185,
+    lng: -121.9178,
+    cuisine: "Xinjiang / Uyghur Chinese",
+    rating: 0,
+    notes: "",
+    dateVisited: ""
   }
 ];
