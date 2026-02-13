@@ -179,5 +179,17 @@ const restaurants = [
     rating: 0,
     notes: "",
     dateVisited: ""
+  },
+  {
+    id: 16,
+    name: "川湘小馆",
+    englishName: "Hunan Szechuan Cuisine",
+    address: "1350 Grant Rd, Mountain View, CA 94040",
+    lat: 37.3942,
+    lng: -122.0952,
+    cuisine: "Hunan / Szechuan Chinese",
+    rating: 0,
+    notes: "",
+    dateVisited: ""
   }
 ];
